@@ -23,7 +23,7 @@ class Game:
         """
         self.pitch = np.zeros(self.size, dtype=int)
         self.score = 0
-        self.terminated = [False, False]
+        self.terminated = False
         
         # Initialize snake with a centered starting position and a length of 3
         self.snake = Snake([(self.size[0] // 2, self.size[1] // 2 - i) for i in range(3)])
@@ -63,22 +63,17 @@ class Game:
             tuple[np.ndarray, float, bool, bool, None]: observation, reward, terminated, truncated, info
         """
         reward = 0.0
-        
-        # Change direction if action is not zero
-        self.snake.change_direction(action)
-               
-        # Move snake
-        tail, self.terminated[0] = self.snake.move(self.size)
 
-        # If snake has bitten its own body the game is over
-        self.terminated[1] = self.snake.positions[0] in self.snake.positions[1:]
-        
+        # Change direction and move snake
+        self.snake.change_direction(action)
+        self.terminated = self.snake.move(self.size)
+
         # Only move on if the game is not terminated
-        if not any(self.terminated):        
+        if not self.terminated:        
             # If snake has eaten the food generate new one and increase body length
             if self.snake.positions[0] == self.food.position:
                 self.food.position = None
-                self.snake.positions.append(tail)
+                self.snake.grow()
                 self.score += 1
                 reward = 1.0
                 
@@ -90,14 +85,14 @@ class Game:
             # Update pitch
             self.update_pitch()
         else:
-            reward = -100.0
+            reward = -1.0
             
         # Construct observation: vector of flattend pitch and one-hot encoded direction of snake
         ohe_direction = np.zeros(4, dtype=np.float16)
         ohe_direction[self.snake.direction] = 1.0
         observation = np.concatenate((self.pitch.flatten(), ohe_direction))
         
-        return observation, reward, any(self.terminated), False, None
+        return observation, reward, self.terminated, False, None
         
     def update_pitch(self, show:bool=False) -> None:
         """Update the pitch.
@@ -136,15 +131,6 @@ class Game:
         pygame.draw.rect(self.screen, self.food_color, 
                          (pos[1] * self.px, pos[0] * self.px, self.px, self.px))
         
-        # 
-        if any(self.terminated):
-            # TODO: Don't use hard coded position values
-            pygame.draw.rect(self.screen, self.score_color, (100, 200, 400, 200))
-            txt_game_over = self.font.render("GAME OVER", True, self.snake_color)
-            self.screen.blit(txt_game_over, (200, 260))
-            txt_restart = self.font.render("Press ENTER to restart", True, self.snake_color)
-            self.screen.blit(txt_restart, (120, 310))
-            
         # Update screen
         self.clock.tick(15)        
         pygame.display.update()
@@ -169,8 +155,6 @@ class Game:
                     action = 2
                 if event.key == pygame.K_LEFT:
                     action = 3
-                if event.key == pygame.K_RETURN:
-                    action = 8    # restart game
         
         return action
             
@@ -189,17 +173,17 @@ class Snake:
         self.direction = 1    # 0: UP, 1: RIGHT, 2: DOWN, 3: LEFT 
         self.directions = {0: (-1, 0), 1: (0, 1), 2: (1, 0), 3: (0, -1)}
         
-    def move(self, bounds:tuple[int, int]) -> tuple[tuple[int, int], bool]:
+    def move(self, bounds:tuple[int, int]) -> bool:
         """Move the snake according to its current direction.
 
         Args:
             bounds (tuple[int, int]): The bounds of the pitch (i.e. its size). 
 
         Returns:
-            tuple[tuple[int, int], bool]: The position of the tail and a termination flag.
+            bool: Flag indicated death of snake.
         """
-        tail = self.positions[-1]
-        terminated = False
+        self.tail = self.positions[-1]    # Keep a "ghost tail" to easily increase body
+        dead = False
         
         # Move each part of the "body" to the predecessor position
         for i in reversed(range(len(self.positions)-1)):
@@ -211,9 +195,12 @@ class Snake:
         if (0 <= new_position[0] < bounds[0]) and (0 <= new_position[1] < bounds[1]):
             self.positions[0] = new_position
         else:
-            terminated = True
+            dead = True
             
-        return tail, terminated
+        if not dead and self.positions[0] in self.positions[1:]:
+            dead = True
+            
+        return dead
             
     def change_direction(self, action:int) -> None:
         """Check whether the new direction is allowed given an action.  
@@ -229,6 +216,11 @@ class Snake:
             self.direction = action
         if action == 3 and self.direction != 1:
             self.direction = action
+            
+    def grow(self) -> None:
+        """Grow the snake by one tile.
+        """
+        self.positions.append(self.tail)
             
 
 class Food:

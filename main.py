@@ -2,19 +2,15 @@ from snake import Game
 
 
 if __name__ == "__main__":
-    size = (40, 40)
-    env = Game(size)
-    env.reset()
-    terminated = False
+    env = Game((40, 40)) 
 
-    while True:
-        action = env.check_events()
-        
-        if action == 8:
-            env.reset()
-            terminated = False 
-        
-        if not terminated:
+    while True:        
+        terminated = False
+        env.reset()
+
+        while not terminated:
+            action = env.check_events()
             _, _, terminated, _, _ = env.step(action)
-
-        env.render()
+            env.render()
+            
+        print(f"Score: {env.score}")
