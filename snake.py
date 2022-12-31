@@ -96,9 +96,6 @@ class Game:
         
     def update_pitch(self) -> None:
         """Update the pitch.
-
-        Args:
-            show (bool, optional): Print the pitch in the console. Defaults to False.
         """
         self.pitch = np.zeros_like(self.pitch)
         
