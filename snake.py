@@ -43,7 +43,7 @@ class Game:
         self.px = 15        
         self.clock = pygame.time.Clock()        
         self.screen = pygame.display.set_mode([s * self.px for s in (self.size[1], self.size[0])])
-        
+                
         # Create initital observation
         self.update_pitch()
         ohe_direction = np.zeros(4, dtype=np.float16)
@@ -87,14 +87,14 @@ class Game:
         else:
             reward = -1.0
             
-        # Construct observation: vector of flattend pitch and one-hot encoded direction of snake
+        # Create observation
         ohe_direction = np.zeros(4, dtype=np.float16)
         ohe_direction[self.snake.direction] = 1.0
         observation = np.concatenate((self.pitch.flatten(), ohe_direction))
         
         return observation, reward, self.terminated, False, None
         
-    def update_pitch(self, show:bool=False) -> None:
+    def update_pitch(self) -> None:
         """Update the pitch.
 
         Args:
@@ -102,17 +102,12 @@ class Game:
         """
         self.pitch = np.zeros_like(self.pitch)
         
-        # Update food and snake position on pitch
+        # Update food position
         self.pitch[self.food.position] = 2
+        
+        # Update snake position
         for pos in self.snake.positions:
             self.pitch[pos] = 1
-
-        # Print pitch to console
-        if show:
-            pitch = np.full_like(self.pitch, " ", dtype=object)
-            pitch[self.pitch == 1] = "S"    # Mark snake position with an "S"
-            pitch[self.pitch == 2] = "F"    # Mark food position with an "F"
-            print(pitch)
             
     def render(self) -> None:
         self.screen.fill(self.bg_color)
