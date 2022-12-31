@@ -9,7 +9,7 @@ if __name__ == "__main__":
     while True:
         action = env.check_events()
         
-        if action == 9:
+        if action == 8:
             env.restart()
             terminated = False 
         

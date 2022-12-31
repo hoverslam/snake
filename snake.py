@@ -54,8 +54,7 @@ class Game:
         reward = 0.0
         
         # Change direction if action is not zero
-        if action != 0:
-            self.snake.change_direction(action)
+        self.snake.change_direction(action)
                
         # Move snake
         tail, self.terminated[0] = self.snake.move(self.size)
@@ -84,7 +83,7 @@ class Game:
             
         # Construct observation: vector of flattend pitch and one-hot encoded direction of snake
         ohe_direction = np.zeros(4, dtype=np.float16)
-        ohe_direction[self.snake.direction-1] = 1.0
+        ohe_direction[self.snake.direction] = 1.0
         observation = np.concatenate((self.pitch.flatten(), ohe_direction))
         
         return observation, reward, any(self.terminated), False, None
@@ -128,6 +127,7 @@ class Game:
         
         # 
         if any(self.terminated):
+            # TODO: Don't use hard coded position values
             pygame.draw.rect(self.screen, self.score_color, (100, 200, 400, 200))
             txt_game_over = self.font.render("GAME OVER", True, self.snake_color)
             self.screen.blit(txt_game_over, (200, 260))
@@ -144,22 +144,22 @@ class Game:
         Returns:
             int: Action corresponding the keyboard stroke.
         """
-        action = 0
+        action = 9    # no action, placeholder if no key is pushed
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT: 
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
-                    action = 1
+                    action = 0
                 if event.key == pygame.K_RIGHT:
-                    action = 2
+                    action = 1
                 if event.key == pygame.K_DOWN:
-                    action = 3
+                    action = 2
                 if event.key == pygame.K_LEFT:
-                    action = 4
+                    action = 3
                 if event.key == pygame.K_RETURN:
-                    action = 9
+                    action = 8    # restart game
         
         return action
             
@@ -175,8 +175,8 @@ class Snake:
             positions (tuple[int, int]): The snakes starting position.
         """
         self.positions = positions
-        self.direction = 2    # 1: UP, 2: RIGHT, 3: DOWN, 4: LEFT 
-        self.directions = {1: (-1, 0), 2: (0, 1), 3: (1, 0), 4: (0, -1)}
+        self.direction = 1    # 0: UP, 1: RIGHT, 2: DOWN, 3: LEFT 
+        self.directions = {0: (-1, 0), 1: (0, 1), 2: (1, 0), 3: (0, -1)}
         
     def move(self, bounds:tuple[int, int]) -> tuple[tuple[int, int], bool]:
         """Move the snake according to its current direction.
@@ -210,13 +210,13 @@ class Snake:
         Args:
             action (int): An action.
         """
+        if action == 0 and self.direction != 2:
+            self.direction = action
         if action == 1 and self.direction != 3:
             self.direction = action
-        if action == 2 and self.direction != 4:
+        if action == 2 and self.direction != 0:
             self.direction = action
         if action == 3 and self.direction != 1:
-            self.direction = action
-        if action == 4 and self.direction != 2:
             self.direction = action
             
 
