@@ -39,7 +39,7 @@ class Game:
         self.font = pygame.font.Font("freesansbold.ttf", 32)
         self.px = 15        
         self.clock = pygame.time.Clock()        
-        self.screen = pygame.display.set_mode([s * self.px for s in self.size])
+        self.screen = pygame.display.set_mode([s * self.px for s in (self.size[1], self.size[0])])
       
     def step(self, action:int) -> tuple[np.ndarray, float, bool, bool, None]:
         """Make one step given an action.
@@ -235,4 +235,4 @@ class Food:
         Args:
             positions (list[tuple]): Possible positions for food.
         """
-        self.position = (np.random.choice(positions[1]), np.random.choice(positions[0]))
+        self.position = (np.random.choice(positions[0]), np.random.choice(positions[1]))
