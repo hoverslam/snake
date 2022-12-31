@@ -11,8 +11,9 @@ run ```main.py```
 
 ## Dependencies
 
-- Python v3.11.0
+- Python v3.10.9
 - Numpy v1.24.1
-- PyGame v2.1.3
+- PyGame v2.1.2
+- PyTorch v1.13.1
 
 Install them with ```pip install -r requirements.txt```
