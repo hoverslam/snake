@@ -107,7 +107,12 @@ class Game:
         for pos in self.snake.positions:
             self.pitch[pos] = 1
             
-    def render(self) -> None:
+    def render(self, fps:int=15) -> None:
+        """Render game to screen.
+
+        Args:
+            fps (int, optional): Frames per second. Defaults to 15.
+        """
         self.screen.fill(self.bg_color)
         
         # Draw score
@@ -129,7 +134,7 @@ class Game:
                          border_radius=(self.px // 2))
         
         # Update screen
-        self.clock.tick(15)        
+        self.clock.tick(fps)        
         pygame.display.update()
     
     def check_events(self) -> int:
