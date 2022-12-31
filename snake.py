@@ -28,6 +28,7 @@ class Game:
         
         # Initialize food
         self.food = Food()
+        self.food.position = (np.random.choice(self.size[0]), np.random.choice(self.size[0]))
         
         # Initialize screen for rendering
         pygame.init()
