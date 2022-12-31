@@ -36,11 +36,12 @@ class Game:
         pygame.init()
         pygame.display.set_caption("Snake")    
         self.bg_color = (0, 0, 0)
-        self.snake_color = (255, 255, 255)
-        self.food_color = (0, 255, 0)
-        self.score_color = (255, 0, 0)
-        self.font = pygame.font.Font("freesansbold.ttf", 32)
-        self.px = 15        
+        self.body_color = (0, 200, 0)
+        self.border_color = (0, 150, 0)
+        self.food_color = (200, 0, 0)
+        self.text_color = (255, 255, 255)
+        self.font = pygame.font.Font("freesansbold.ttf", 20)
+        self.px = 15    # Size of a "tile" in pixels        
         self.clock = pygame.time.Clock()        
         self.screen = pygame.display.set_mode([s * self.px for s in (self.size[1], self.size[0])])
                 
@@ -110,18 +111,22 @@ class Game:
         self.screen.fill(self.bg_color)
         
         # Draw score
-        txt_score = self.font.render(str(self.score), True, self.score_color)
+        txt_score = self.font.render(f"Score: {self.score}", True, self.text_color)
         self.screen.blit(txt_score, (10, 10))
         
         # Draw snake
         for pos in self.snake.positions:
-            pygame.draw.rect(self.screen, self.snake_color, 
+            pygame.draw.rect(self.screen, self.body_color, 
                              (pos[1] * self.px, pos[0] * self.px, self.px, self.px))
+            pygame.draw.rect(self.screen, self.border_color, 
+                             (pos[1] * self.px, pos[0] * self.px, self.px, self.px),
+                             width=2)
         
         # Draw food
         pos = self.food.position
         pygame.draw.rect(self.screen, self.food_color, 
-                         (pos[1] * self.px, pos[0] * self.px, self.px, self.px))
+                         (pos[1] * self.px, pos[0] * self.px, self.px, self.px),
+                         border_radius=(self.px // 2))
         
         # Update screen
         self.clock.tick(15)        
