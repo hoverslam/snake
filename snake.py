@@ -34,12 +34,7 @@ class Game:
         
         # Initialize screen for rendering
         pygame.init()
-        pygame.display.set_caption("Snake")    
-        self.bg_color = (0, 0, 0)
-        self.body_color = (0, 200, 0)
-        self.border_color = (0, 150, 0)
-        self.food_color = (200, 0, 0)
-        self.text_color = (255, 255, 255)
+        pygame.display.set_caption("Snake")
         self.font = pygame.font.Font("freesansbold.ttf", 20)
         self.px = 15    # Size of a "tile" in pixels        
         self.clock = pygame.time.Clock()        
@@ -113,23 +108,29 @@ class Game:
         Args:
             fps (int, optional): Frames per second. Defaults to 15.
         """
-        self.screen.fill(self.bg_color)
+        # Draw background
+        self.screen.fill((0, 0, 0))
         
         # Draw score
-        txt_score = self.font.render(f"Score: {self.score}", True, self.text_color)
+        txt_score = self.font.render(f"Score: {self.score}", True, (255, 255, 255))
         self.screen.blit(txt_score, (10, 10))
         
         # Draw snake
-        for pos in self.snake.positions:
-            pygame.draw.rect(self.screen, self.body_color, 
+        border_color = (0, 150, 0)
+        for i, pos in enumerate(self.snake.positions):
+            if i == 0:
+                body_color = border_color
+            else:
+                body_color = (0, 200, 0)
+            pygame.draw.rect(self.screen, body_color, 
                              (pos[1] * self.px, pos[0] * self.px, self.px, self.px))
-            pygame.draw.rect(self.screen, self.border_color, 
+            pygame.draw.rect(self.screen, border_color, 
                              (pos[1] * self.px, pos[0] * self.px, self.px, self.px),
                              width=2)
         
         # Draw food
         pos = self.food.position
-        pygame.draw.rect(self.screen, self.food_color, 
+        pygame.draw.rect(self.screen, (200, 0, 0), 
                          (pos[1] * self.px, pos[0] * self.px, self.px, self.px),
                          border_radius=(self.px // 2))
         
