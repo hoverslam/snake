@@ -4,12 +4,21 @@ import sys
 
 
 class Game:
+    """A class representing the game logic.
+    """
     
     def __init__(self, size:tuple[int, int]=(40, 40)) -> None:
+        """Initialze the game.
+
+        Args:
+            size (tuple[int, int], optional): Size of the playing field. Defaults to (40, 40).
+        """
         self.size = size
         self.restart()
         
-    def restart(self):
+    def restart(self) -> None:
+        """Restart the game.
+        """
         self.pitch = np.zeros(self.size, dtype=int)
         self.score = 0
         self.terminated = [False, False]
@@ -33,6 +42,15 @@ class Game:
         self.screen = pygame.display.set_mode([s * self.px for s in self.size])
       
     def step(self, action:int) -> tuple[np.ndarray, float, bool, bool, None]:
+        """Make one step given an action.
+
+        Args:
+            action (int): Action to take this step. 
+                (0: no action, 1: up, 2: right, 3: down, 4: left)
+
+        Returns:
+            tuple[np.ndarray, float, bool, bool, None]: observation, reward, terminated, truncated, info
+        """
         reward = 0.0
         
         # Change direction if action is not zero
@@ -67,6 +85,11 @@ class Game:
         return self.pitch, reward, any(self.terminated), False, None
         
     def update_pitch(self, show:bool=False) -> None:
+        """Update the pitch.
+
+        Args:
+            show (bool, optional): Print the pitch in the console. Defaults to False.
+        """
         self.pitch = np.zeros_like(self.pitch)
         
         # Update food and snake position on pitch
@@ -111,6 +134,11 @@ class Game:
         pygame.display.update()
     
     def check_events(self) -> int:
+        """Check for keyboard strokes.
+
+        Returns:
+            int: Action corresponding the keyboard stroke.
+        """
         action = 0
         
         for event in pygame.event.get():
@@ -132,13 +160,28 @@ class Game:
             
 
 class Snake:
+    """A class representing a snake moving over the pitch.
+    """
    
     def __init__(self, positions:tuple[int, int]) -> None:
+        """Initialize the class.
+
+        Args:
+            positions (tuple[int, int]): The snakes starting position.
+        """
         self.positions = positions
         self.direction = 2    # 1: UP, 2: RIGHT, 3: DOWN, 4: LEFT 
         self.directions = {1: (-1, 0), 2: (0, 1), 3: (1, 0), 4: (0, -1)}
         
     def move(self, bounds:tuple[int, int]) -> tuple[tuple[int, int], bool]:
+        """Move the snake according to its current direction.
+
+        Args:
+            bounds (tuple[int, int]): The bounds of the pitch (i.e. its size). 
+
+        Returns:
+            tuple[tuple[int, int], bool]: The position of the tail and a termination flag.
+        """
         tail = self.positions[-1]
         terminated = False
         
@@ -156,21 +199,35 @@ class Snake:
             
         return tail, terminated
             
-    def change_direction(self, new_direction:int) -> None:
-        if new_direction == 1 and self.direction != 3:
-            self.direction = new_direction
-        if new_direction == 2 and self.direction != 4:
-            self.direction = new_direction
-        if new_direction == 3 and self.direction != 1:
-            self.direction = new_direction
-        if new_direction == 4 and self.direction != 2:
-            self.direction = new_direction
+    def change_direction(self, action:int) -> None:
+        """Check whether the new direction is allowed given an action.  
+
+        Args:
+            action (int): An action.
+        """
+        if action == 1 and self.direction != 3:
+            self.direction = action
+        if action == 2 and self.direction != 4:
+            self.direction = action
+        if action == 3 and self.direction != 1:
+            self.direction = action
+        if action == 4 and self.direction != 2:
+            self.direction = action
             
 
 class Food:
+    """Class representing the food for the snake.
+    """
     
     def __init__(self) -> None:
+        """Initialize food without a position.
+        """
         self.position = None
 
-    def regenerate(self, positions) -> None:
+    def regenerate(self, positions:list[tuple]) -> None:
+        """Generate a new food source at a random position.
+
+        Args:
+            positions (list[tuple]): Possible positions for food.
+        """
         self.position = (np.random.choice(positions[1]), np.random.choice(positions[0]))
