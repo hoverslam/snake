@@ -8,16 +8,18 @@ class Game:
     """
     
     def __init__(self, size:tuple[int, int]=(40, 40)) -> None:
-        """Initialze the game.
+        """Initialize the game.
 
         Args:
             size (tuple[int, int], optional): Size of the playing field. Defaults to (40, 40).
         """
         self.size = size
-        self.restart()
         
-    def restart(self) -> None:
-        """Restart the game.
+    def reset(self) -> np.ndarray:
+        """Reset game to initial state.
+
+        Returns:
+            np.ndarray: Initial observation
         """
         self.pitch = np.zeros(self.size, dtype=int)
         self.score = 0
@@ -41,6 +43,14 @@ class Game:
         self.px = 15        
         self.clock = pygame.time.Clock()        
         self.screen = pygame.display.set_mode([s * self.px for s in (self.size[1], self.size[0])])
+        
+        # Create initital observation
+        self.update_pitch()
+        ohe_direction = np.zeros(4, dtype=np.float16)
+        ohe_direction[self.snake.direction] = 1.0
+        observation = np.concatenate((self.pitch.flatten(), ohe_direction))
+        
+        return observation
       
     def step(self, action:int) -> tuple[np.ndarray, float, bool, bool, None]:
         """Make one step given an action.

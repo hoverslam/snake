@@ -4,13 +4,14 @@ from snake import Game
 if __name__ == "__main__":
     size = (40, 40)
     env = Game(size)
+    env.reset()
     terminated = False
-    
+
     while True:
         action = env.check_events()
         
         if action == 8:
-            env.restart()
+            env.reset()
             terminated = False 
         
         if not terminated:
