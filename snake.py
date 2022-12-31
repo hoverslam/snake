@@ -7,8 +7,12 @@ class Game:
     
     def __init__(self, size:tuple[int, int]=(40, 40)) -> None:
         self.size = size
-        self.pitch = np.zeros(size, dtype=int)
+        self.restart()
+        
+    def restart(self):
+        self.pitch = np.zeros(self.size, dtype=int)
         self.score = 0
+        self.terminated = [False, False]
         
         # Initialize snake with a centered starting position and a length of 3
         self.snake = Snake([(self.size[0] // 2, self.size[1] // 2 - i) for i in range(3)])
@@ -16,22 +20,33 @@ class Game:
         # Initialize food
         self.food = Food()
         
+        # Initialize screen for rendering
+        pygame.init()
+        pygame.display.set_caption("Snake")    
+        self.bg_color = (0, 0, 0)
+        self.snake_color = (255, 255, 255)
+        self.food_color = (0, 255, 0)
+        self.score_color = (255, 0, 0)
+        self.font = pygame.font.Font("freesansbold.ttf", 32)
+        self.px = 15        
+        self.clock = pygame.time.Clock()        
+        self.screen = pygame.display.set_mode([s * self.px for s in self.size])
+      
     def step(self, action:int) -> tuple[np.ndarray, float, bool, bool, None]:
         reward = 0.0
-        terminated = [False, False]
         
         # Change direction if action is not zero
         if action != 0:
             self.snake.change_direction(action)
                
         # Move snake
-        tail, terminated[0] = self.snake.move(self.size)
+        tail, self.terminated[0] = self.snake.move(self.size)
 
         # If snake has bitten its own body the game is over
-        terminated[1] = self.snake.positions[0] in self.snake.positions[1:]
+        self.terminated[1] = self.snake.positions[0] in self.snake.positions[1:]
         
         # Only move on if the game is not terminated
-        if not any(terminated):        
+        if not any(self.terminated):        
             # If snake has eaten the food generate new one and increase body length
             if self.snake.positions[0] == self.food.position:
                 self.food.position = None
@@ -49,7 +64,7 @@ class Game:
         else:
             reward = -100.0
         
-        return self.pitch, reward, any(terminated), False, None
+        return self.pitch, reward, any(self.terminated), False, None
         
     def update_pitch(self, show:bool=False) -> None:
         self.pitch = np.zeros_like(self.pitch)
@@ -65,6 +80,55 @@ class Game:
             pitch[self.pitch == 1] = "S"    # Mark snake position with an "S"
             pitch[self.pitch == 2] = "F"    # Mark food position with an "F"
             print(pitch)
+            
+    def render(self) -> None:
+        self.screen.fill(self.bg_color)
+        
+        # Draw score
+        txt_score = self.font.render(str(self.score), True, self.score_color)
+        self.screen.blit(txt_score, (10, 10))
+        
+        # Draw snake
+        for pos in self.snake.positions:
+            pygame.draw.rect(self.screen, self.snake_color, 
+                             (pos[1] * self.px, pos[0] * self.px, self.px, self.px))
+        
+        # Draw food
+        pos = self.food.position
+        pygame.draw.rect(self.screen, self.food_color, 
+                         (pos[1] * self.px, pos[0] * self.px, self.px, self.px))
+        
+        # 
+        if any(self.terminated):
+            pygame.draw.rect(self.screen, self.score_color, (100, 200, 400, 200))
+            txt_game_over = self.font.render("GAME OVER", True, self.snake_color)
+            self.screen.blit(txt_game_over, (200, 260))
+            txt_restart = self.font.render("Press ENTER to restart", True, self.snake_color)
+            self.screen.blit(txt_restart, (120, 310))
+            
+        # Update screen
+        self.clock.tick(15)        
+        pygame.display.update()
+    
+    def check_events(self) -> int:
+        action = 0
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT: 
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    action = 1
+                if event.key == pygame.K_RIGHT:
+                    action = 2
+                if event.key == pygame.K_DOWN:
+                    action = 3
+                if event.key == pygame.K_LEFT:
+                    action = 4
+                if event.key == pygame.K_RETURN:
+                    action = 9
+        
+        return action
             
 
 class Snake:
@@ -109,66 +173,4 @@ class Food:
         self.position = None
 
     def regenerate(self, positions) -> None:
-        self.position = (np.random.choice(positions[0]), np.random.choice(positions[1]))
-
-
-
-# Game Loop
-# TODO: put this in the GAME class and make a render function 
-if __name__ == "__main__":
-    size = (40, 40)
-    env = Game(size)
-    terminated = False
-    
-    pygame.init()
-    
-    bg_color = (0, 0, 0)
-    snake_color = (255, 255, 255)
-    food_color = (0, 255, 0)
-    score_color = (255, 0, 0)
-    font = pygame.font.Font("freesansbold.ttf", 32)
-    px = 15
-    
-    clock = pygame.time.Clock()
-    
-    screen = pygame.display.set_mode([s * px for s in size])
-    pygame.display.set_caption("Snake")
-    
-    while True:
-        action = 0
-        score = font.render(str(env.score), True, score_color)
-        game_over = font.render("GAME OVER", True, snake_color)
-        
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT: 
-                sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    action = 1
-                if event.key == pygame.K_RIGHT:
-                    action = 2
-                if event.key == pygame.K_DOWN:
-                    action = 3
-                if event.key == pygame.K_LEFT:
-                    action = 4
-        
-        screen.fill(bg_color)
-        screen.blit(score, (10, 10))
-          
-        if not terminated:
-            _, _, terminated, _, _ = env.step(action)
-        else:
-            pygame.draw.rect(screen, score_color, (100, 200, 400, 200))
-            screen.blit(game_over, (200, 280))
- 
-        # Draw snake
-        for pos in env.snake.positions:
-            pygame.draw.rect(screen, snake_color, (pos[1] * px, pos[0] * px, px, px))
-        
-        # Draw food
-        pos = env.food.position
-        pygame.draw.rect(screen, food_color, (pos[1] * px, pos[0] * px, px, px))
-                
-        clock.tick(15)        
-        pygame.display.update()                 
- 
+        self.position = (np.random.choice(positions[1]), np.random.choice(positions[0]))
