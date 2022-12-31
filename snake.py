@@ -81,8 +81,13 @@ class Game:
             self.update_pitch()
         else:
             reward = -100.0
+            
+        # Construct observation: vector of flattend pitch and one-hot encoded direction of snake
+        ohe_direction = np.zeros(4, dtype=np.float16)
+        ohe_direction[self.snake.direction-1] = 1.0
+        observation = np.concatenate((self.pitch.flatten(), ohe_direction))
         
-        return self.pitch, reward, any(self.terminated), False, None
+        return observation, reward, any(self.terminated), False, None
         
     def update_pitch(self, show:bool=False) -> None:
         """Update the pitch.
