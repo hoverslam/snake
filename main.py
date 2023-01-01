@@ -48,7 +48,7 @@ def play(human:bool) -> None:
     if not human:
         agent.load_model("dqn.pt")
         agent.model.eval()
-        fps = 50
+        fps = 100
     else:
         fps=15
     
