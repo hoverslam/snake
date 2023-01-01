@@ -1,8 +1,9 @@
 # Snake
 
-A simple implementation of the old video game **Snake**. It comes with a step() function like the OpenAI environments to easily train an RL agent.
+A simple implementation of the old video game **Snake**.
 
-<img src="screenshot.png?raw=true" height="300">
+<img src="img/screenshot_1000.gif?raw=true" height="300">
+
 
 ## How to
 
@@ -15,5 +16,7 @@ run ```main.py```
 - Numpy v1.24.1
 - PyGame v2.1.2
 - PyTorch v1.13.1
+- Tqdm v4.64.1
+- Matplotlib v3.6.2
 
 Install them with ```pip install -r requirements.txt```
