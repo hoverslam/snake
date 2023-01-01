@@ -19,7 +19,7 @@ class Game:
         """Reset game to initial state.
 
         Returns:
-            np.ndarray: Initial observation
+            np.ndarray: Initial observation.
         """
         self.pitch = np.zeros(self.size, dtype=int)
         self.score = 0
@@ -39,21 +39,14 @@ class Game:
         self.px = 15    # Size of a "tile" in pixels        
         self.clock = pygame.time.Clock()        
         self.screen = pygame.display.set_mode([s * self.px for s in (self.size[1], self.size[0])])
-                
-        # Create initital observation
-        self.update_pitch()
-        ohe_direction = np.zeros(4, dtype=np.float16)
-        ohe_direction[self.snake.direction] = 1.0
-        observation = np.concatenate((self.pitch.flatten(), ohe_direction))
-        
-        return observation
+                      
+        return self.create_observation()
       
     def step(self, action:int) -> tuple[np.ndarray, float, bool, bool, None]:
         """Make one step given an action.
 
         Args:
-            action (int): Action to take this step. 
-                (0: no action, 1: up, 2: right, 3: down, 4: left)
+            action (int): Action to take this step. (0: no action, 1: up, 2: right, 3: down, 4: left)
 
         Returns:
             tuple[np.ndarray, float, bool, bool, None]: observation, reward, terminated, truncated, info
@@ -75,20 +68,15 @@ class Game:
                 
             # Generate new food if there is none    
             if self.food.position is None:
-                self.food.regenerate(np.where(self.pitch == 0))
+                self.food.regenerate(np.where(self.pitch == 0))                
             self.pitch[self.food.position] = 2
             
             # Update pitch
             self.update_pitch()
         else:
             reward = -1.0
-            
-        # Create observation
-        ohe_direction = np.zeros(4, dtype=np.float16)
-        ohe_direction[self.snake.direction] = 1.0
-        observation = np.concatenate((self.pitch.flatten(), ohe_direction))
-        
-        return observation, reward, self.terminated, False, None
+
+        return self.create_observation(), reward, self.terminated, False, None
         
     def update_pitch(self) -> None:
         """Update the pitch.
@@ -160,17 +148,57 @@ class Game:
                     action = 3
         
         return action
-            
+    
+    def create_observation(self) -> np.ndarray:
+        """Creates an observation containing the near vicinity of the head, the snakes current 
+        direction, and the direction to the food.
+        
+
+        Returns:
+            np.ndarray: An observation of the current state.
+        """
+        head = self.snake.positions[0]
+        
+        # Make an array showing the vicinity (5x5) of the snakes head with ones indicating danger.
+        vicinity = np.zeros((5, 5), dtype=int)
+        for i, x_offset in enumerate(range(-2, 3)):
+            for j, y_offset in enumerate(range(-2, 3)):
+                pos = (head[0] + x_offset, head[1] + y_offset)
+                if (0 <= pos[0] < self.size[0]) and (0 <= pos[1] < self.size[1]):
+                    vicinity[i, j] = self.pitch[pos[0], pos[1]]
+                else:
+                    vicinity[i, j] = 1
+        
+        # If food is in the vicinity set it to zero since this is not a threat.
+        vicinity[np.where(vicinity == 2)] = 0
+        
+        # One-hot encode the current direction
+        snake_directions = np.zeros(4, dtype=int)
+        snake_directions[self.snake.direction] = 1
+        
+        # Find the direction in which the food is located.
+        food_directions = np.zeros(4, dtype=int)
+        vec = (head[0] - self.food.position[0], head[1] - self.food.position[1])
+        food_directions[0] = 1 if vec[0] > 0 else 0
+        food_directions[1] = 1 if vec[1] < 0 else 0
+        food_directions[2] = 1 if vec[0] < 0 else 0
+        food_directions[3] = 1 if vec[1] > 0 else 0
+        
+        # Combine vicinity, snake_directions and food_directions to one observation vector.
+        observation = np.concatenate([vicinity.flatten(), snake_directions, food_directions])
+        
+        return observation.astype(np.float32)
+
 
 class Snake:
     """A class representing a snake moving over the pitch.
     """
    
-    def __init__(self, positions:tuple[int, int]) -> None:
+    def __init__(self, positions:list[tuple[int, int]]) -> None:
         """Initialize the class.
 
         Args:
-            positions (tuple[int, int]): The snakes starting position.
+            positions (list[tuple[int, int]]): The snakes starting position.
         """
         self.positions = positions
         self.direction = 1    # 0: UP, 1: RIGHT, 2: DOWN, 3: LEFT 
