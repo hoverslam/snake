@@ -2,7 +2,7 @@
 
 A simple implementation of the old video game **Snake**. It comes with a step() function like the OpenAI environments to easily train an RL agent.
 
-<img src="img/screenshot.png?raw=true" height="300">
+<img src="screenshot.png?raw=true" height="300">
 
 ## How to
 
