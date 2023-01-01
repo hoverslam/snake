@@ -57,6 +57,7 @@ if __name__ == "__main__":
     env = Game()
     agent = DQNAgent(33, 512, 4, 1e-4, 0.99, 0.5, 64)    
     
-    train_agent(500) 
-    evaluate_agent(1000)
-    play("ai")
+    #train_agent(500) 
+    #evaluate_agent(1000)
+    
+    play("human")
