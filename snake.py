@@ -15,11 +15,11 @@ class Game:
         """
         self.size = size
         
-    def reset(self) -> np.ndarray:
+    def reset(self) -> tuple[np.ndarray, np.ndarray]:
         """Reset game to initial state.
 
         Returns:
-            np.ndarray: Initial observation.
+            np.ndarray: Initial observation and the playing field
         """
         self.pitch = np.zeros(self.size, dtype=int)
         self.score = 0
@@ -41,16 +41,16 @@ class Game:
         self.clock = pygame.time.Clock()        
         self.screen = pygame.display.set_mode([s * self.px for s in (self.size[1], self.size[0])])
                       
-        return self.create_observation()
+        return self.create_observation(), self.pitch
       
-    def step(self, action:int) -> tuple[np.ndarray, float, bool, bool, None]:
+    def step(self, action:int) -> tuple[np.ndarray, float, bool, bool, np.ndarray]:
         """Make one step given an action.
 
         Args:
             action (int): Action to take this step. (0: no action, 1: up, 2: right, 3: down, 4: left)
 
         Returns:
-            tuple[np.ndarray, float, bool, bool, None]: observation, reward, terminated, truncated, info
+            tuple[np.ndarray, float, bool, bool, np.ndarray]: observation, reward, terminated, truncated, info
         """
         reward = 0.0
 
@@ -77,7 +77,7 @@ class Game:
         # Update pitch
         self.update_pitch()
 
-        return self.create_observation(), reward, self.terminated, False, None
+        return self.create_observation(), reward, self.terminated, False, self.pitch
         
     def update_pitch(self) -> None:
         """Update the pitch.
