@@ -9,9 +9,9 @@ A simple implementation of the old video game **Snake**.
 
 Install dependencies with    ```pip install -r requirements.txt```.
 
-Run    ```main.py train <n>```    to train an agent for <n> episodes.
+Run    ```main.py train <n>```    to train an agent for n episodes.
 
-Run    ```main.py evaluate <n>```    to evaluate (i.e. average score) a trained agent over <n> episodes.
+Run    ```main.py evaluate <n>```    to evaluate (i.e. average score) a trained agent over n episodes.
 
 Run    ```main.py play True```    to play the game.
 
