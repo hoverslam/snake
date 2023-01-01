@@ -1,5 +1,5 @@
-from snake import Game
-from agents import DQNAgent
+from modules.snake import Game
+from modules.agents import DQNAgent
 from tqdm import trange
 import matplotlib.pyplot as plt
 
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     env = Game()
     agent = DQNAgent(33, 512, 4, 1e-4, 0.99, 0.5, 64)    
     
-    #train_agent(500) 
-    #evaluate_agent(1000)
+    train_agent(100) 
+    evaluate_agent(10)
     
-    play("human")
+    play("ai")
