@@ -7,7 +7,28 @@ A simple implementation of the old video game **Snake**.
 
 ## How to
 
-run ```main.py```
+Install dependencies with    ```pip install -r requirements.txt```.
+
+Run    ```main.py train <n>```    to train an agent for <n> episodes.
+
+Run    ```main.py evaluate <n>```    to evaluate (i.e. average score) a trained agent over <n> episodes.
+
+Run    ```main.py play True```    to play the game.
+
+Run    ```main.py play False```    to let the RL agent to its thing.
+
+
+## Deep Q-Network (DQN)
+
+Reference: [V. Mnih, K. Kavukcuoglu, D. Silver, A. Graves, I. Antonoglou, D. Wierstra, and M. Riedmiller (2013) Playing Atari with Deep Reinforcement Learning](https://arxiv.org/abs/1312.5602)
+
+The agent is based on the DQN algorithm and if fully trained gets an average score over 1000 episodes of:
+
+| Episodes trained  | Score |
+|-------------------|:-----:|
+| 100               | 21.00 |
+| 500               | 50.05 |
+| 1000              | 59.19 |
 
 
 ## Dependencies
@@ -19,5 +40,3 @@ run ```main.py```
 - Tqdm v4.64.1
 - Matplotlib v3.6.2
 - Typer v0.7.0
-
-Install them with ```pip install -r requirements.txt```
