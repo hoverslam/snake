@@ -31,6 +31,8 @@ class Game:
         # Initialize food with a random starting position
         self.food = Food((np.random.choice(self.size[0]), np.random.choice(self.size[1])))
         
+        self.update_pitch()
+        
         # Initialize screen for rendering
         pygame.init()
         pygame.display.set_caption("Snake")
@@ -68,11 +70,12 @@ class Game:
             # Generate new food if there is none    
             if self.food.position is None:
                 self.food.generate(np.argwhere(self.pitch == 0))                          
-            
-            # Update pitch
-            self.update_pitch()
+             
         else:
             reward = -1.0
+            
+        # Update pitch
+        self.update_pitch()
 
         return self.create_observation(), reward, self.terminated, False, None
         
@@ -184,7 +187,7 @@ class Game:
         
         # Combine vicinity, snake_directions and food_directions to one observation vector.
         observation = np.concatenate([vicinity.flatten(), snake_directions, food_directions])
-        
+
         return observation.astype(np.float32)
 
 
