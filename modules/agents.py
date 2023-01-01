@@ -1,4 +1,5 @@
 import random
+import os
 import torch
 from torch import nn
 from tqdm import trange
@@ -142,7 +143,26 @@ class DQNAgent(nn.Module):
         self.optimizer.step()
         
         return loss
-    
+
+    def save_model(self, file_name: str) -> None:
+        """Save model.
+
+        Args:
+            file_name (str): File name of the model. A common PyTorch convention is 
+            using .pt file extension. 
+        """
+        path = os.path.join(os.getcwd(), "models", file_name)
+        torch.save(self.model.state_dict(), path)
+        
+    def load_model(self, file_name: str) -> None:
+        """Load model.
+        
+        Args:
+            file_name (str): File name of the model.
+        """
+        path = os.path.join(os.getcwd(), "models", file_name)
+        self.model.load_state_dict(torch.load(path, map_location=self.device))
+
 
 class ReplayMemory:
     """Class that stores the agents experiences.
