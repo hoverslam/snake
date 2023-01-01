@@ -18,5 +18,6 @@ run ```main.py```
 - PyTorch v1.13.1
 - Tqdm v4.64.1
 - Matplotlib v3.6.2
+- Typer v0.7.0
 
 Install them with ```pip install -r requirements.txt```

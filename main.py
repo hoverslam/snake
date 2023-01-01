@@ -1,19 +1,25 @@
+import typer
+import matplotlib.pyplot as plt
+from tqdm import trange
+
 from modules.snake import Game
 from modules.agents import DQNAgent
-from tqdm import trange
-import matplotlib.pyplot as plt
 
+
+app = typer.Typer()
 
 env = Game()
 agent = DQNAgent(33, 512, 4, 1e-4, 0.99, 0.3, 64)
-       
-def train_agent(episodes):
+
+@app.command()       
+def train(episodes:int)-> None:
     history = agent.train(env, episodes, 10000)
     agent.save_model("dqn.pt")
     plt.scatter(x=history["episode"], y=history["score"], s=3, alpha=0.8)
     plt.show()
-    
-def evaluate_agent(episodes):
+
+@app.command()    
+def evaluate(episodes:int) -> None:
     agent.load_model("dqn.pt")
     agent.model.eval()
     scores = []
@@ -36,9 +42,10 @@ def evaluate_agent(episodes):
     
     mean_score = sum(scores) / float(len(scores))    
     print(f"Average score over {episodes} episodes: {mean_score:.2f}")
-        
-def play(player="human"):
-    if player == "ai":
+
+@app.command()        
+def play(human:bool) -> None:
+    if not human:
         agent.load_model("dqn.pt")
         agent.model.eval()
         fps = 50
@@ -51,7 +58,7 @@ def play(player="human"):
   
         while not terminated:
             action = env.check_events()
-            if player == "ai":
+            if not human:
                 action = agent.choose_action(obs)
             obs, _, terminated, _, _ = env.step(action)
             
@@ -61,7 +68,4 @@ def play(player="human"):
 
 
 if __name__ == "__main__":
-    #train_agent(1000)
-    #evaluate_agent(1000)
-    
-    play("ai")
+    app()
