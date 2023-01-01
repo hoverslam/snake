@@ -147,6 +147,8 @@ class Game:
                     action = 2
                 if event.key == pygame.K_LEFT:
                     action = 3
+                if event.key == pygame.K_r:
+                    self.reset()
         
         return action
     
