@@ -28,9 +28,8 @@ class Game:
         # Initialize snake with a centered starting position and a length of 3
         self.snake = Snake([(self.size[0] // 2, self.size[1] // 2 - i) for i in range(3)])
         
-        # Initialize food
-        self.food = Food()
-        self.food.position = (np.random.choice(self.size[0]), np.random.choice(self.size[0]))
+        # Initialize food with a random starting position
+        self.food = Food((np.random.choice(self.size[0]), np.random.choice(self.size[1])))
         
         # Initialize screen for rendering
         pygame.init()
@@ -59,17 +58,16 @@ class Game:
 
         # Only move on if the game is not terminated
         if not self.terminated:        
-            # If snake has eaten the food generate new one and increase body length
+            # If snake has eaten the food increase score and body length
             if self.snake.positions[0] == self.food.position:
                 self.food.position = None
                 self.snake.grow()
                 self.score += 1
                 reward = 1.0
-                
+
             # Generate new food if there is none    
             if self.food.position is None:
-                self.food.regenerate(np.where(self.pitch == 0))                
-            self.pitch[self.food.position] = 2
+                self.food.generate(np.argwhere(self.pitch == 0))                          
             
             # Update pitch
             self.update_pitch()
@@ -258,15 +256,19 @@ class Food:
     """Class representing the food for the snake.
     """
     
-    def __init__(self) -> None:
-        """Initialize food without a position.
-        """
-        self.position = None
+    def __init__(self, position:tuple[int, int]) -> None:
+        """Initialize class.
 
-    def regenerate(self, positions:list[tuple]) -> None:
+        Args:
+            position (tuple[int, int]): The initial position.
+        """
+        self.position = position
+
+    def generate(self, positions:np.ndarray) -> None:
         """Generate a new food source at a random position.
 
         Args:
-            positions (list[tuple]): Possible positions for food.
-        """
-        self.position = (np.random.choice(positions[0]), np.random.choice(positions[1]))
+            positions (np.ndarray): Possible positions for food.
+        """          
+        idx = np.arange(positions.shape[0])        
+        self.position = tuple(positions[np.random.choice(idx)])
