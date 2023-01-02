@@ -2,7 +2,10 @@
 
 A simple implementation of the old video game **Snake**.
 
-<img src="img/screenshot_1000.gif?raw=true" height="300">
+<br>
+
+<p align="center"><img src="img/screenshot_1000.gif?raw=true" height="300"></p>
+<p align="center"><em>DQN after 1000 episodes</em></p>
 
 
 ## How to
