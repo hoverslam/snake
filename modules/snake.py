@@ -62,13 +62,13 @@ class Game:
         if not self.terminated:        
             # If snake has eaten the food increase score and body length
             if self.snake.positions[0] == self.food.position:
-                self.food.position = None
+                self.food.position = (-1, -1)
                 self.snake.grow()
                 self.score += 1
                 reward = 1.0
 
             # Generate new food if there is none    
-            if self.food.position is None:
+            if self.food.position is (-1, -1):
                 self.food.generate(np.argwhere(self.pitch == 0))                          
              
         else:
