@@ -1,5 +1,6 @@
 import random
 import os
+import numpy as np
 import torch
 from torch import nn
 from tqdm import trange
@@ -50,7 +51,7 @@ class DQNAgent(nn.Module):
         
         return logits
     
-    def choose_action(self, x:torch.Tensor, epsilon:float=0.0) -> int:
+    def choose_action(self, obs:np.ndarray, epsilon:float=0.0) -> int:
         """Choose an action based on an observation.
 
         Args:
@@ -63,7 +64,7 @@ class DQNAgent(nn.Module):
         if random.uniform(0, 1) < epsilon:
             action = random.randint(0, 3)
         else:
-            logits = self(x)
+            logits = self(obs)
             proba = nn.Softmax(dim=0)(logits)
             action = proba.argmax().item()
         
