@@ -152,10 +152,12 @@ class Game:
 
         return action
 
-    def create_observation(self) -> np.ndarray:
+    def create_observation(self, size: int = 5) -> np.ndarray:
         """Creates an observation containing the near vicinity of the head, the snakes current 
         direction, and the direction to the food.
 
+        Args:
+            size (int, optional): The size of the vicinity the snake "sees". A size x size grid. Defaults to 5.
 
         Returns:
             np.ndarray: An observation of the current state.
@@ -163,9 +165,11 @@ class Game:
         head = self.snake.positions[0]
 
         # Make an array showing the vicinity (5x5) of the snakes head with ones indicating danger.
-        vicinity = np.zeros((5, 5), dtype=int)
-        for i, x_offset in enumerate(range(-2, 3)):
-            for j, y_offset in enumerate(range(-2, 3)):
+        vicinity = np.zeros((size, size), dtype=int)
+        min = int(-np.floor(size / 2))
+        max = int(np.ceil(size / 2))
+        for i, x_offset in enumerate(range(min, max)):
+            for j, y_offset in enumerate(range(min, max)):
                 pos = (head[0] + x_offset, head[1] + y_offset)
                 if (0 <= pos[0] < self.size[0]) and (0 <= pos[1] < self.size[1]):
                     vicinity[i, j] = self.pitch[pos[0], pos[1]]
