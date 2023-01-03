@@ -9,9 +9,9 @@ from tqdm import trange
 class DQNAgent(nn.Module):
     """A class representing an RL agent using a Deep Q-Network.
     """
-    
-    def __init__(self, input_dim:int, hidden_dim:int, output_dim:int, learning_rate:float, 
-                 gamma:float, epsilon:float, batch_size:int, memory_size:int=10000) -> None:
+
+    def __init__(self, input_dim: int, hidden_dim: int, output_dim: int, learning_rate: float,
+                 gamma: float, epsilon: float, batch_size: int, memory_size: int = 10000) -> None:
         """Initialize agent.
 
         Args:
@@ -31,13 +31,13 @@ class DQNAgent(nn.Module):
         self.memory = ReplayMemory(memory_size)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model = nn.Sequential(
-            nn.Linear(input_dim, hidden_dim), 
+            nn.Linear(input_dim, hidden_dim),
             nn.ReLU(),
             nn.Linear(hidden_dim, output_dim)
         )
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=learning_rate)
-        
-    def forward(self, x:torch.Tensor) -> torch.Tensor:
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         """A single forward pass through the network.
 
         Args:
@@ -48,10 +48,10 @@ class DQNAgent(nn.Module):
         """
         x = torch.tensor(x, dtype=torch.float32) if not torch.is_tensor(x) else x
         logits = self.model(x)
-        
+
         return logits
-    
-    def choose_action(self, obs:np.ndarray, epsilon:float=0.0) -> int:
+
+    def choose_action(self, obs: np.ndarray, epsilon: float = 0.0) -> int:
         """Choose an action based on an observation.
 
         Args:
@@ -67,10 +67,10 @@ class DQNAgent(nn.Module):
             logits = self(obs)
             proba = nn.Softmax(dim=0)(logits)
             action = proba.argmax().item()
-        
+
         return action
-    
-    def train(self, env, episodes:int, max_steps:int=10000) -> dict:
+
+    def train(self, env, episodes: int, max_steps: int = 10000) -> dict:
         """Training loop.
 
         Args:
@@ -83,13 +83,13 @@ class DQNAgent(nn.Module):
         """
         history = {"episode": [], "loss": [], "score": []}
         epsilon = self.epsilon
-    
+
         pbar = trange(episodes)
         for e in pbar:
             terminated = False
             obs, _ = env.reset()
             episode_losses = []
-            
+
             # Simple epsilon decay
             if e > episodes // 2:
                 epsilon = max(epsilon * 0.99, 0.01)
@@ -98,9 +98,9 @@ class DQNAgent(nn.Module):
                 env.check_events()
                 action = self.choose_action(obs, epsilon)
                 obs_, reward, terminated, _, _ = env.step(action)
-                self.memory.add((obs, action, reward, obs_, terminated))        
+                self.memory.add((obs, action, reward, obs_, terminated))
                 obs = obs_
-                
+
                 # Optimization
                 batch = self.memory.sample(self.batch_size)
                 batch[0].requires_grad_()
@@ -112,16 +112,16 @@ class DQNAgent(nn.Module):
 
                 if terminated:
                     break
-            
-            mean_loss = sum(episode_losses) / float(len(episode_losses))    
+
+            mean_loss = sum(episode_losses) / float(len(episode_losses))
             pbar.set_description(f"loss={mean_loss:.6f}")
             history["episode"].append(e)
             history["loss"].append(mean_loss)
             history["score"].append(env.score)
-            
+
         return history
-    
-    def gradient_descent(self, batch:list[torch.Tensor]) -> torch.Tensor:
+
+    def gradient_descent(self, batch: list[torch.Tensor]) -> torch.Tensor:
         """An optimization step given a batch of experiences.
 
         Args:
@@ -137,12 +137,12 @@ class DQNAgent(nn.Module):
         pred = logits.gather(1, action)
         target = reward + self.gamma * self(obs_).max(1, keepdim=True)[0] * not_terminated
         loss = ((target - pred)**2).mean()
-        
+
         # Backward pass
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
-        
+
         return loss
 
     def save_model(self, file_name: str) -> None:
@@ -154,10 +154,10 @@ class DQNAgent(nn.Module):
         """
         path = os.path.join(os.getcwd(), "models", file_name)
         torch.save(self.model.state_dict(), path)
-        
+
     def load_model(self, file_name: str) -> None:
         """Load model.
-        
+
         Args:
             file_name (str): File name of the model.
         """
@@ -168,8 +168,8 @@ class DQNAgent(nn.Module):
 class ReplayMemory:
     """Class that stores the agents experiences.
     """
-    
-    def __init__(self, size:int) -> None:
+
+    def __init__(self, size: int) -> None:
         """Initialize replay memory with a given size.
 
         Args:
@@ -178,8 +178,8 @@ class ReplayMemory:
         self.size = size
         self.data = []
         self.index = 0
-        
-    def add(self, experience:tuple) -> None:
+
+    def add(self, experience: tuple) -> None:
         """Add experience to memory.
 
         Args:
@@ -191,8 +191,8 @@ class ReplayMemory:
             self.data[self.index] = experience
 
         self.index = (self.index + 1) % self.size
-        
-    def sample(self, batch_size:int) -> list[torch.Tensor]:
+
+    def sample(self, batch_size: int) -> list[torch.Tensor]:
         """Sample a batch of experiences.
 
         Args:
@@ -209,13 +209,13 @@ class ReplayMemory:
             torch.empty((batch_size, dim), dtype=torch.float32),    # next observations
             torch.empty((batch_size, 1), dtype=torch.float32),      # not terminated
         ]
-        
+
         sample = random.choices(self.data, k=batch_size)
         for i, (obs, action, reward, obs_, terminated) in enumerate(sample):
-            batch[0][i,:] = torch.from_numpy(obs)
+            batch[0][i, :] = torch.from_numpy(obs)
             batch[1][i] = action
             batch[2][i] = reward
-            batch[3][i,:] = torch.from_numpy(obs_)
+            batch[3][i, :] = torch.from_numpy(obs_)
             batch[4][i] = not terminated
-        
+
         return batch
