@@ -10,15 +10,15 @@ A simple implementation of the old video game **Snake**.
 
 ## How to
 
-Install dependencies with    ```pip install -r requirements.txt```.
+Install dependencies with `pip install -r requirements.txt`.
 
-Run    ```main.py train <n>```    to train an agent for n episodes.
+Run    `main.py train <n>` to train an agent for n episodes.
 
-Run    ```main.py evaluate <n>```    to evaluate (i.e. average score) a trained agent over n episodes.
+Run    `main.py evaluate <n>` to evaluate (i.e. average score) a trained agent over n episodes.
 
-Run    ```main.py play True```    to play the game.
+Run    `main.py play True` to play the game.
 
-Run    ```main.py play False```    to let the RL agent to its thing.
+Run    `main.py play False` to let the RL agent to its thing.
 
 
 ## Deep Q-Network (DQN)
