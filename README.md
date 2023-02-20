@@ -18,7 +18,7 @@ Run    `main.py evaluate <n>` to evaluate (i.e. average score) a trained agent o
 
 Run    `main.py play True` to play the game.
 
-Run    `main.py play False` to let the RL agent to its thing.
+Run    `main.py play False` to let the RL agent do its thing.
 
 
 ## Deep Q-Network (DQN)
